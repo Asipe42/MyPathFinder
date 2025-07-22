@@ -154,10 +154,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MenuManager.cpp" />
     <ClCompile Include="MyPathFinder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MenuManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

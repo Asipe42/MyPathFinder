@@ -25,3 +25,4 @@ Makefile
 *.VC.VC.opendb
 .DS_Store
 Thumbs.db
+MyPathFinder/x64/Debug

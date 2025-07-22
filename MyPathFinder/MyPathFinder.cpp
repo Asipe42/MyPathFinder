@@ -2,13 +2,17 @@
 #include <string>
 #include <vector>
 
+#include "MazeGenerator.h"
 #include "MenuManager.h"
 
 int main()
 {
     MenuManager menu;
-    EMazeGeneratorType maze = menu.SelectMazeGenerator();
+    EMazeGeneratorType mazeType = menu.SelectMazeGenerator();
     EPathfindingType pathfinder = menu.SelectPathfinder();
 
+    MazeGenerator mazeGenerator;
+    mazeGenerator.Generate(mazeType);
+    
     return 0;
 }

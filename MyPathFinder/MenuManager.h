@@ -5,7 +5,6 @@ enum class EMazeGeneratorType
     None,
     DFS,
     BFS,
-    RecursiveDivision,
     BinaryTree,
     Sidewinder,
     Prim

@@ -9,10 +9,9 @@ void MenuManager::ShowMazeGeneratorMenu() const
     std::cout << "╠════════════════════════════════╣\n";
     std::cout << "║ 1. DFS                         ║\n";
     std::cout << "║ 2. BFS                         ║\n";
-    std::cout << "║ 3. Recursive Division          ║\n";
-    std::cout << "║ 4. Binary Tree                 ║\n";
-    std::cout << "║ 5. Sidewinder                  ║\n";
-    std::cout << "║ 6. Prim                        ║\n";
+    std::cout << "║ 3. Binary Tree                 ║\n";
+    std::cout << "║ 4. Sidewinder                  ║\n";
+    std::cout << "║ 5. Prim                        ║\n";
     std::cout << "╚════════════════════════════════╝\n";
 }
 
