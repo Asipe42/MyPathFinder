@@ -22,7 +22,7 @@ enum class EPathfindingType
 class MenuManager
 {
 public:
-    static constexpr int MazeGeneratorMin = 1;
+    static constexpr int MazeGeneratorMin = 0;
     static constexpr int MazeGeneratorMax = 6;
     static constexpr int PathfindingMin = 1;
     static constexpr int PathfindingMax = 4;

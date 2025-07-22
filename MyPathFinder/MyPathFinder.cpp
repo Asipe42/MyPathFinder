@@ -7,12 +7,15 @@
 
 int main()
 {
-    MenuManager menu;
-    EMazeGeneratorType mazeType = menu.SelectMazeGenerator();
-    EPathfindingType pathfinder = menu.SelectPathfinder();
-
-    MazeGenerator mazeGenerator;
-    mazeGenerator.Generate(mazeType);
+    while (true)
+    {
+        MenuManager menu;
+        EMazeGeneratorType mazeType = menu.SelectMazeGenerator();
+        EPathfindingType pathfinder = menu.SelectPathfinder();
+        
+        MazeGenerator mazeGenerator;
+        mazeGenerator.Generate(mazeType);
+    }
     
     return 0;
 }

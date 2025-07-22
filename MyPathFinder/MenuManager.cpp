@@ -7,6 +7,7 @@ void MenuManager::ShowMazeGeneratorMenu() const
     std::cout << "╔════════════════════════════════╗\n";
     std::cout << "║     Select Maze Generation     ║\n";
     std::cout << "╠════════════════════════════════╣\n";
+    std::cout << "║ 0. Exit                        ║\n";
     std::cout << "║ 1. DFS                         ║\n";
     std::cout << "║ 2. BFS                         ║\n";
     std::cout << "║ 3. Binary Tree                 ║\n";

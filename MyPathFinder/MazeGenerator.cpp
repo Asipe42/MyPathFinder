@@ -1,6 +1,7 @@
 ﻿#include "MazeGenerator.h"
 
 #include <iostream>
+#include <queue>
 #include <random>
 #include <stack>
 
@@ -24,6 +25,8 @@ void MazeGenerator::Generate(EMazeGeneratorType type)
             GenerateWithSidewinder();
             break;
     }
+    
+    m_maze[HEIGHT - 2][WIDTH - 2] = 1;
 
     PrintMaze();
 }
@@ -35,19 +38,23 @@ void MazeGenerator::InitializeMaze()
 
 void MazeGenerator::PrintMaze()
 {
-    // ANSI 색상 코드
-    const char* orange = "\033[38;2;255;165;0m";   // RGB(255,165,0) 주황색
-    const char* white  = "\033[38;2;255;255;255m"; // 흰색
-    const char* reset  = "\033[0m";                // 색상 초기화
+    const char* wall  = "\033[48;2;0;255;0m  \033[0m";      // 벽: 초록 배경 2칸 공백
+    const char* path  = "\033[48;2;255;255;255m  \033[0m";  // 길: 흰 배경 2칸 공백
+    const char* start = "\033[48;2;255;255;0m  \033[0m";    // 출발지: 노랑 배경 2칸 공백
+    const char* end   = "\033[48;2;255;0;0m  \033[0m";      // 도착지: 빨강 배경 2칸 공백
 
     for (int y = 0; y < HEIGHT; ++y)
     {
         for (int x = 0; x < WIDTH; ++x)
         {
-            if (m_maze[y][x] == 0)
-                std::cout << orange << "■" << reset;
+            if (x == 1 && y == 1)
+                std::cout << start;
+            else if (x == WIDTH - 2 && y == HEIGHT - 2)
+                std::cout << end;
+            else if (m_maze[y][x] == 0)
+                std::cout << wall;
             else
-                std::cout << white << "□" << reset;
+                std::cout << path;
         }
         std::cout << '\n';
     }
@@ -114,7 +121,58 @@ void MazeGenerator::GenerateWithDFS()
 
 void MazeGenerator::GenerateWithBFS()
 {
+    /*
+     * BFS
+     *  1. 모든 셀을 벽으로 초기화.
+     *  2. 시작 지점을 길로 설정하고, 큐에 추가
+     *  3. 큐에서 현재 위치를 꺼냄
+     *  4. 상화좌우 방향을 중복 없이 무작위로 선택
+     *  5. 현재 위치 기준, 선택된 방향으로 2칸 떨어진 위치 탐색
+     *  6. 벽이면 중간 벽 제거하여 길 뚫고, 뚫은 위치를 큐에 삽입
+     *  7. 큐가 빌 때까지 2~6단계를 반복
+     */
+    
     InitializeMaze();
+
+    std::queue<std::pair<int, int>> queue;
+    queue.push({1, 1});
+    m_maze[1][1] = 1;
+
+    std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
+
+    const int dx[4] = { 0, 0, -2, 2 };
+    const int dy[4] = { -2, 2, 0, 0 };
+
+    while (!queue.empty())
+    {
+        std::pair<int, int> pos = queue.front();
+        queue.pop();
+
+        int x = pos.first;
+        int y = pos.second;
+
+        std::vector<int> dirs = { 0, 1, 2, 3 };
+        std::shuffle(dirs.begin(), dirs.end(), rng);
+
+        for (auto index : dirs)
+        {
+            int nx = x + dx[index];
+            int ny = y + dy[index];
+
+            if (nx <= 0 || ny <= 0)
+                continue;
+
+            if (nx >= WIDTH || ny >= HEIGHT)
+                continue;
+
+            if (m_maze[ny][nx] != 0)
+                continue;
+
+            m_maze[y + dy[index] / 2][x + dx[index] / 2] = 1;
+            m_maze[ny][nx] = 1;
+            queue.push({nx, ny});
+        }
+    }
 }
 
 void MazeGenerator::GenerateWithBinaryTree()
