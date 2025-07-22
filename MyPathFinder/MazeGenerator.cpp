@@ -64,7 +64,7 @@ void MazeGenerator::GenerateWithDFS()
 {
     /*
      * DFS
-     *  1. 모든 셀을 벽으로 초기화.
+     *  1. 모든 셀을 벽으로 초기화
      *  2. 시작 위치 선정
      *  3. 상하좌우 방향을 중복 없이 무작위 선택
      *  4-1. 현재 위치 기준, 선택한 방향으로 2칸 떨어진 위치 탐색
@@ -123,7 +123,7 @@ void MazeGenerator::GenerateWithBFS()
 {
     /*
      * BFS
-     *  1. 모든 셀을 벽으로 초기화.
+     *  1. 모든 셀을 벽으로 초기화
      *  2. 시작 지점을 길로 설정하고, 큐에 추가
      *  3. 큐에서 현재 위치를 꺼냄
      *  4. 상화좌우 방향을 중복 없이 무작위로 선택
@@ -177,7 +177,39 @@ void MazeGenerator::GenerateWithBFS()
 
 void MazeGenerator::GenerateWithBinaryTree()
 {
+    /*
+     * Binary Tree
+     *  1. 모든 셀을 벽으로 초기화
+     *  2. 시작 지점으로부터 홀수 행과 홀수 열을 순회하며 각 셀을 방문
+     *  3. 방문한 셀을 길로 변경
+     *  4. 현재 셀에서 북쪽 또는 동쪽 방향 중 하나를 선택
+     *  5. 선택한 방향의 벽을 허물어 통로를 연결
+     *  6. 미로 끝까지 4~5단계를 반복
+     */
+    
     InitializeMaze();
+
+    for (int y = 1; y < HEIGHT; y += 2)
+    {
+        for (int x = 1; x < WIDTH; x += 2)
+        {
+            m_maze[y][x] = 1;
+            std::vector<std::pair<int, int>> dir;
+
+            if (y > 1)
+                dir.emplace_back(0, -1); // north
+            if (x < WIDTH -2)
+                dir.emplace_back(1, 0);  // east
+
+            if (!dir.empty())
+            {
+                std::pair<int, int> pair = dir[rand() % dir.size()];
+                int ny = y + pair.second;
+                int nx = x + pair.first;
+                m_maze[ny][nx] = 1;
+            }
+        }
+    }
 }
 
 void MazeGenerator::GenerateWithSidewinder()
