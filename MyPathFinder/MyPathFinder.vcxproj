@@ -154,13 +154,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MazeDrawer.cpp" />
     <ClCompile Include="MazeGenerator.cpp" />
-    <ClCompile Include="MenuManager.cpp" />
+    <ClCompile Include="MazePathFinder.cpp" />
+    <ClCompile Include="MenuUI.cpp" />
     <ClCompile Include="MyPathFinder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MazeConfig.h" />
+    <ClInclude Include="MazeDrawer.h" />
     <ClInclude Include="MazeGenerator.h" />
-    <ClInclude Include="MenuManager.h" />
+    <ClInclude Include="MazePathFinder.h" />
+    <ClInclude Include="MenuUI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,25 +1,7 @@
 ﻿#pragma once
+#include "MazeConfig.h"
 
-enum class EMazeGeneratorType
-{
-    None,
-    DFS,
-    BFS,
-    BinaryTree,
-    Sidewinder,
-    Prim
-};
-
-enum class EPathfindingType
-{
-    None,
-    DFS,
-    BFS,
-    Dijkstra,
-    AStar
-};
-
-class MenuManager
+class MenuUI
 {
 public:
     static constexpr int MazeGeneratorMin = 0;
@@ -31,6 +13,6 @@ public:
     void ShowPathfindingMenu() const;
     
     int GetUserChoice(int min, int max) const;
-    EMazeGeneratorType SelectMazeGenerator() const;
-    EPathfindingType SelectPathfinder() const;
+    MazeConfig::EMazeType SelectMazeGenerator() const;
+    MazeConfig::EPathType SelectPathfinder() const;
 };

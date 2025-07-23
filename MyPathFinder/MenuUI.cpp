@@ -1,13 +1,12 @@
-﻿#include "MenuManager.h"
+﻿#include "MenuUI.h"
 #include <iostream>
 #include <limits>
 
-void MenuManager::ShowMazeGeneratorMenu() const
+void MenuUI::ShowMazeGeneratorMenu() const
 {
     std::cout << "╔════════════════════════════════╗\n";
     std::cout << "║     Select Maze Generation     ║\n";
     std::cout << "╠════════════════════════════════╣\n";
-    std::cout << "║ 0. Exit                        ║\n";
     std::cout << "║ 1. DFS                         ║\n";
     std::cout << "║ 2. BFS                         ║\n";
     std::cout << "║ 3. Binary Tree                 ║\n";
@@ -16,7 +15,7 @@ void MenuManager::ShowMazeGeneratorMenu() const
     std::cout << "╚════════════════════════════════╝\n";
 }
 
-void MenuManager::ShowPathfindingMenu() const
+void MenuUI::ShowPathfindingMenu() const
 {
     std::cout << "╔════════════════════════════════╗\n";
     std::cout << "║  Select Pathfinding Algorithm  ║\n";
@@ -28,7 +27,7 @@ void MenuManager::ShowPathfindingMenu() const
     std::cout << "╚════════════════════════════════╝\n";
 }
 
-int MenuManager::GetUserChoice(int min, int max) const
+int MenuUI::GetUserChoice(int min, int max) const
 {
     int input;
     
@@ -48,16 +47,16 @@ int MenuManager::GetUserChoice(int min, int max) const
     return input;
 }
 
-EMazeGeneratorType MenuManager::SelectMazeGenerator() const
+MazeConfig::EMazeType MenuUI::SelectMazeGenerator() const
 {
     ShowMazeGeneratorMenu();
     int choice = GetUserChoice(MazeGeneratorMin, MazeGeneratorMax);
-    return static_cast<EMazeGeneratorType>(choice);
+    return static_cast<MazeConfig::EMazeType>(choice);
 }
 
-EPathfindingType MenuManager::SelectPathfinder() const
+MazeConfig::EPathType MenuUI::SelectPathfinder() const
 {
     ShowPathfindingMenu();
     int choice = GetUserChoice(PathfindingMin, PathfindingMax);
-    return static_cast<EPathfindingType>(choice);
+    return static_cast<MazeConfig::EPathType>(choice);
 }

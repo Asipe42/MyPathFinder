@@ -2,20 +2,26 @@
 #include <string>
 #include <vector>
 
+#include "MazeDrawer.h"
 #include "MazeGenerator.h"
-#include "MenuManager.h"
+#include "MazePathFinder.h"
+#include "MenuUI.h"
 
 int main()
 {
     while (true)
     {
-        MenuManager menu;
-        EMazeGeneratorType mazeType = menu.SelectMazeGenerator();
-        EPathfindingType pathfinder = menu.SelectPathfinder();
+        MenuUI menu;
+        MazeDrawer mazeDrawer;
+        MazeGenerator mazeGenerator(mazeDrawer);
+        MazePathFinder mazePathFinder(mazeDrawer);
         
-        MazeGenerator mazeGenerator;
-        mazeGenerator.Generate(mazeType);
+        auto mazeType = menu.SelectMazeGenerator();
+        auto pathType = menu.SelectPathfinder();
+        
+        std::vector<std::vector<int>> maze = mazeGenerator.Generate(mazeType);
+        mazePathFinder.FindPath(maze, pathType);
     }
     
     return 0;
-}
+ }

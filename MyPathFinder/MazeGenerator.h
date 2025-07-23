@@ -1,20 +1,20 @@
 ﻿#pragma once
 #include <vector>
 
-#include "MenuManager.h"
+#include "MazeDrawer.h"
+#include "MenuUI.h"
 
 class MazeGenerator
 {
 public:
-    void Generate(EMazeGeneratorType type);
+    MazeGenerator(MazeDrawer mazeDrawer);
+    std::vector<std::vector<int>> Generate(MazeConfig::EMazeType type);
 
 private:
-    static constexpr int WIDTH = 25;
-    static constexpr int HEIGHT = 25;
     std::vector<std::vector<int>> m_maze;
+    MazeDrawer m_mazeDrawer;
 
     void InitializeMaze();
-    void PrintMaze();
     
     void GenerateWithDFS();
     void GenerateWithBFS();

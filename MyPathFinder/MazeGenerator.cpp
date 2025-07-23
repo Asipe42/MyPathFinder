@@ -6,62 +6,42 @@
 #include <stack>
 #include <thread>
 
-void MazeGenerator::Generate(EMazeGeneratorType type)
+#include "MazeConfig.h"
+
+MazeGenerator::MazeGenerator(MazeDrawer mazeDrawer)
+{
+    m_mazeDrawer = mazeDrawer;
+}
+
+std::vector<std::vector<int>> MazeGenerator::Generate(MazeConfig::EMazeType type)
 {
     std::cout << "\033[2J\033[H";
     
     switch (type)
     {
-        case EMazeGeneratorType::DFS:
+        case MazeConfig::EMazeType::DFS:
             GenerateWithDFS();
             break;
-        case EMazeGeneratorType::BFS:
+        case MazeConfig::EMazeType::BFS:
             GenerateWithBFS();
             break;
-        case EMazeGeneratorType::BinaryTree:
+        case MazeConfig::EMazeType::BinaryTree:
             GenerateWithBinaryTree();
             break;
-        case EMazeGeneratorType::Sidewinder:
+        case MazeConfig::EMazeType::Sidewinder:
             GenerateWithSidewinder();
             break;
-        case EMazeGeneratorType::Prim:
+        case MazeConfig::EMazeType::Prim:
             GenerateWithPrim();
             break;
     }
+
+    return m_maze;
 }
 
 void MazeGenerator::InitializeMaze()
 {
-    m_maze = std::vector<std::vector<int>>(HEIGHT, std::vector<int>(WIDTH, 0));
-}
-
-void MazeGenerator::PrintMaze()
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    std::cout << "\033[H";
-
-    const char* wall  = "\033[48;2;0;255;0m  \033[0m";      // 벽: 초록 배경 2칸 공백
-    const char* path  = "\033[48;2;255;255;255m  \033[0m";  // 길: 흰 배경 2칸 공백
-    const char* start = "\033[48;2;255;255;0m  \033[0m";    // 출발지: 노랑 배경 2칸 공백
-    const char* end   = "\033[48;2;255;0;0m  \033[0m";      // 도착지: 빨강 배경 2칸 공백
-
-    for (int y = 0; y < HEIGHT; ++y)
-    {
-        for (int x = 0; x < WIDTH; ++x)
-        {
-            if (x == 1 && y == 1)
-                std::cout << start;
-            else if (x == WIDTH - 2 && y == HEIGHT - 2)
-                std::cout << end;
-            else if (m_maze[y][x] == 0)
-                std::cout << wall;
-            else
-                std::cout << path;
-        }
-        std::cout << '\n';
-    }
-
-    std::cout << std::flush;
+    m_maze = std::vector<std::vector<int>>(MazeConfig::HEIGHT, std::vector<int>(MazeConfig::WIDTH, 0));
 }
 
 void MazeGenerator::GenerateWithDFS()
@@ -82,7 +62,7 @@ void MazeGenerator::GenerateWithDFS()
     stack.push({1, 1});
     m_maze[1][1] = 1;
 
-    PrintMaze();
+    m_mazeDrawer.Draw(m_maze);
 
     std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
 
@@ -107,7 +87,7 @@ void MazeGenerator::GenerateWithDFS()
             if (nx <= 0 || ny <= 0)
                 continue;
 
-            if (nx >= WIDTH || ny >= HEIGHT)
+            if (nx >= MazeConfig::WIDTH || ny >= MazeConfig::HEIGHT)
                 continue;
 
             if (m_maze[ny][nx] != 0)
@@ -118,7 +98,7 @@ void MazeGenerator::GenerateWithDFS()
             stack.push({nx, ny});
             moved = true;
 
-            PrintMaze();
+            m_mazeDrawer.Draw(m_maze);
             break;
         }
 
@@ -126,8 +106,8 @@ void MazeGenerator::GenerateWithDFS()
             stack.pop();
     }
 
-    m_maze[HEIGHT - 2][WIDTH - 2] = 1;
-    PrintMaze();
+    m_maze[MazeConfig::HEIGHT - 2][MazeConfig::WIDTH - 2] = 1;
+    m_mazeDrawer.Draw(m_maze);
 }
 
 void MazeGenerator::GenerateWithBFS()
@@ -149,7 +129,7 @@ void MazeGenerator::GenerateWithBFS()
     queue.push({1, 1});
     m_maze[1][1] = 1;
 
-    PrintMaze();
+    m_mazeDrawer.Draw(m_maze);
 
     std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
 
@@ -175,7 +155,7 @@ void MazeGenerator::GenerateWithBFS()
             if (nx <= 0 || ny <= 0)
                 continue;
 
-            if (nx >= WIDTH || ny >= HEIGHT)
+            if (nx >= MazeConfig::WIDTH || ny >= MazeConfig::HEIGHT)
                 continue;
 
             if (m_maze[ny][nx] != 0)
@@ -186,7 +166,7 @@ void MazeGenerator::GenerateWithBFS()
             
             queue.push({nx, ny});
 
-            PrintMaze();
+            m_mazeDrawer.Draw(m_maze);
         }
     }
 }
@@ -205,16 +185,16 @@ void MazeGenerator::GenerateWithBinaryTree()
     
     InitializeMaze();
 
-    for (int y = 1; y < HEIGHT; y += 2)
+    for (int y = 1; y < MazeConfig::HEIGHT; y += 2)
     {
-        for (int x = 1; x < WIDTH; x += 2)
+        for (int x = 1; x < MazeConfig::WIDTH; x += 2)
         {
             m_maze[y][x] = 1;
             std::vector<std::pair<int, int>> dir;
 
-            if (y < HEIGHT -2)
+            if (y < MazeConfig::HEIGHT -2)
                 dir.emplace_back(0, 1); // South
-            if (x < WIDTH -2)
+            if (x < MazeConfig::WIDTH -2)
                 dir.emplace_back(1, 0); // East
 
             if (!dir.empty())
@@ -224,7 +204,7 @@ void MazeGenerator::GenerateWithBinaryTree()
                 int nx = x + pair.first;
                 m_maze[ny][nx] = 1;
 
-                PrintMaze();
+                m_mazeDrawer.Draw(m_maze);
             }
         }
     }
@@ -246,27 +226,27 @@ void MazeGenerator::GenerateWithSidewinder()
     
     InitializeMaze();
 
-    for (int y = 1; y < HEIGHT - 1; y+= 2)
+    for (int y = 1; y < MazeConfig::HEIGHT - 1; y+= 2)
     {
         std::vector<int> run;
 
-        for (int x = 1; x < WIDTH - 1; x +=2)
+        for (int x = 1; x < MazeConfig::WIDTH - 1; x +=2)
         {
             m_maze[y][x] = 1;
 
-            PrintMaze();
+            m_mazeDrawer.Draw(m_maze);
 
             run.push_back(x);
 
-            bool atEasternBoundary = (x + 2 >= WIDTH - 1);
-            bool atSoutherBoundary = (y + 2 >= HEIGHT - 1);
+            bool atEasternBoundary = (x + 2 >= MazeConfig::WIDTH - 1);
+            bool atSoutherBoundary = (y + 2 >= MazeConfig::HEIGHT - 1);
             bool carveEast = !atEasternBoundary && (atSoutherBoundary || (rand() % 2 == 0));
 
             if (carveEast)
             {
                 m_maze[y][x + 1] = 1;
 
-                PrintMaze();
+                m_mazeDrawer.Draw(m_maze);
             }
             else
             {
@@ -278,7 +258,7 @@ void MazeGenerator::GenerateWithSidewinder()
                     m_maze[y + 1][carveX] = 1;
                     m_maze[y + 2][carveX] = 1;
 
-                    PrintMaze();
+                    m_mazeDrawer.Draw(m_maze);
                 }
 
                 run.clear();
@@ -303,13 +283,13 @@ void MazeGenerator::GenerateWithPrim()
     
     InitializeMaze();
 
-    bool visited[HEIGHT][WIDTH] = { false };
+    bool visited[MazeConfig::HEIGHT][MazeConfig::WIDTH] = { false };
     std::vector<std::pair<int, int>> wallList;
 
     m_maze[1][1] = 1;
     visited[1][1] = true;
 
-    PrintMaze();
+    m_mazeDrawer.Draw(m_maze);
 
     const int dy[4] = { -2, 2, 0, 0 };
     const int dx[4] = { 0, 0, -2, 2 };
@@ -324,7 +304,7 @@ void MazeGenerator::GenerateWithPrim()
             if (ny <= 0 || nx <= 0)
                 continue;
 
-            if (ny >= HEIGHT || nx >= WIDTH)
+            if (ny >= MazeConfig::HEIGHT || nx >= MazeConfig::WIDTH)
                 continue;
 
             if (visited[ny][nx])
@@ -350,7 +330,7 @@ void MazeGenerator::GenerateWithPrim()
             if (ny <= 0 || nx <= 0)
                 continue;
 
-            if (ny >= HEIGHT || nx >= WIDTH)
+            if (ny >= MazeConfig::HEIGHT || nx >= MazeConfig::WIDTH)
                 continue;
 
             if (visited[ny][nx] && !visited[wy][wx])
@@ -362,7 +342,7 @@ void MazeGenerator::GenerateWithPrim()
                 
                 addWalls(wy, wx);
 
-                PrintMaze();
+                m_mazeDrawer.Draw(m_maze);
 
                 break;
             }
