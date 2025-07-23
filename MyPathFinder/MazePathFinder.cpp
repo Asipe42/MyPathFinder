@@ -1,6 +1,8 @@
 ﻿#include "MazePathFinder.h"
 
+#include <immintrin.h>
 #include <iostream>
+#include <queue>
 #include <smmintrin.h>
 #include <stack>
 
@@ -40,7 +42,7 @@ void MazePathFinder::FindPathWithDFS()
     /*
      * DFS
      *  1. 시작 지점을 방문하고 스택에 넣음
-     *  2. 스택에 있는 값을 꺼내 현재 위치로 설정
+     *  2. 스택에서 값을 꺼내 현재 위치로 설정
      *  3. 아직 방문하지 않은 이웃 셀(상, 하, 좌, 우)를 확인
      *  4-1. 방문 가능한 이웃이 있다면 그 셀을 방문 후 스택에 넣고 3단계로 회귀
      *  4-2. 방문 가능한 이웃이 없다면 2단계로 회귀
@@ -105,12 +107,71 @@ void MazePathFinder::FindPathWithDFS()
 
 void MazePathFinder::FindPathWithBFS()
 {
+    /*
+     * BFS
+     *  1. 시작 지점을 방문하고 큐에 넣음
+     *  2. 큐에서 값을 꺼내 현재 위치로 설정
+     *  3. 아직 방문하지 않은 이웃 셀(상, 하, 좌, 우)를 확인
+     *  4. 방문 가능한 이웃 셀을 모두 큐에 넣고 방문 처리
+     *  5. 현재 위치가 도착지라면 탐색 종료
+     *  6. 큐가 빌 때까지 2단계로 회귀
+     */
+
+    std::queue<std::pair<int, int>> queue;
+    bool visited[MazeConfig::HEIGHT][MazeConfig::WIDTH] = { false };
+
+    std::pair<int, int> start = { 1, 1 };
+    std::pair<int, int> end = { MazeConfig::WIDTH - 2, MazeConfig::HEIGHT - 2 };
+    queue.push(start);
+    
+    visited[start.second][start.first] = true;
+    m_maze[start.second][start.first] = 2;
+    m_mazeDrawer.Draw(m_maze);
+
+    const int dx[4] = { 0, 0, -1, 1 };
+    const int dy[4] = { -1, 1, 0, 0 };
+
+    while (!queue.empty())
+    {
+        std::pair<int, int> current = queue.front();
+        queue.pop();
+
+        if (current == end)
+            break;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = current.first + dx[i];
+            int ny = current.second + dy[i];
+
+            if (nx <= 0 || ny <= 0)
+                continue;
+
+            if (nx >= MazeConfig::HEIGHT || ny >= MazeConfig::WIDTH)
+                continue;;
+            
+            if (visited[ny][nx])
+                continue;
+
+            if (m_maze[ny][nx] == 0)
+                continue;
+
+            std::pair<int, int> next = { nx, ny };
+            queue.push(next);
+            
+            visited[ny][nx] = true;
+            m_maze[ny][nx] = 2;
+            m_mazeDrawer.Draw(m_maze);
+        }
+    }
 }
 
 void MazePathFinder::FindPathWithDijkstar()
 {
+    
 }
 
 void MazePathFinder::FindPathWithAStar()
 {
+    
 }
