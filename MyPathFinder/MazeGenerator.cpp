@@ -4,9 +4,12 @@
 #include <queue>
 #include <random>
 #include <stack>
+#include <thread>
 
 void MazeGenerator::Generate(EMazeGeneratorType type)
 {
+    std::cout << "\033[2J\033[H";
+    
     switch (type)
     {
         case EMazeGeneratorType::DFS:
@@ -25,10 +28,6 @@ void MazeGenerator::Generate(EMazeGeneratorType type)
             GenerateWithPrim();
             break;
     }
-    
-    m_maze[HEIGHT - 2][WIDTH - 2] = 1;
-
-    PrintMaze();
 }
 
 void MazeGenerator::InitializeMaze()
@@ -38,6 +37,9 @@ void MazeGenerator::InitializeMaze()
 
 void MazeGenerator::PrintMaze()
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::cout << "\033[H";
+
     const char* wall  = "\033[48;2;0;255;0m  \033[0m";      // 벽: 초록 배경 2칸 공백
     const char* path  = "\033[48;2;255;255;255m  \033[0m";  // 길: 흰 배경 2칸 공백
     const char* start = "\033[48;2;255;255;0m  \033[0m";    // 출발지: 노랑 배경 2칸 공백
@@ -58,6 +60,8 @@ void MazeGenerator::PrintMaze()
         }
         std::cout << '\n';
     }
+
+    std::cout << std::flush;
 }
 
 void MazeGenerator::GenerateWithDFS()
@@ -77,6 +81,8 @@ void MazeGenerator::GenerateWithDFS()
     std::stack<std::pair<int, int>> stack;
     stack.push({1, 1});
     m_maze[1][1] = 1;
+
+    PrintMaze();
 
     std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
 
@@ -111,12 +117,17 @@ void MazeGenerator::GenerateWithDFS()
             m_maze[ny][nx] = 1;
             stack.push({nx, ny});
             moved = true;
+
+            PrintMaze();
             break;
         }
 
         if (!moved)
             stack.pop();
     }
+
+    m_maze[HEIGHT - 2][WIDTH - 2] = 1;
+    PrintMaze();
 }
 
 void MazeGenerator::GenerateWithBFS()
@@ -137,6 +148,8 @@ void MazeGenerator::GenerateWithBFS()
     std::queue<std::pair<int, int>> queue;
     queue.push({1, 1});
     m_maze[1][1] = 1;
+
+    PrintMaze();
 
     std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
 
@@ -170,7 +183,10 @@ void MazeGenerator::GenerateWithBFS()
 
             m_maze[y + dy[index] / 2][x + dx[index] / 2] = 1;
             m_maze[ny][nx] = 1;
+            
             queue.push({nx, ny});
+
+            PrintMaze();
         }
     }
 }
@@ -207,6 +223,8 @@ void MazeGenerator::GenerateWithBinaryTree()
                 int ny = y + pair.second;
                 int nx = x + pair.first;
                 m_maze[ny][nx] = 1;
+
+                PrintMaze();
             }
         }
     }
@@ -235,6 +253,9 @@ void MazeGenerator::GenerateWithSidewinder()
         for (int x = 1; x < WIDTH - 1; x +=2)
         {
             m_maze[y][x] = 1;
+
+            PrintMaze();
+
             run.push_back(x);
 
             bool atEasternBoundary = (x + 2 >= WIDTH - 1);
@@ -244,6 +265,8 @@ void MazeGenerator::GenerateWithSidewinder()
             if (carveEast)
             {
                 m_maze[y][x + 1] = 1;
+
+                PrintMaze();
             }
             else
             {
@@ -254,6 +277,8 @@ void MazeGenerator::GenerateWithSidewinder()
                 {
                     m_maze[y + 1][carveX] = 1;
                     m_maze[y + 2][carveX] = 1;
+
+                    PrintMaze();
                 }
 
                 run.clear();
@@ -283,6 +308,8 @@ void MazeGenerator::GenerateWithPrim()
 
     m_maze[1][1] = 1;
     visited[1][1] = true;
+
+    PrintMaze();
 
     const int dy[4] = { -2, 2, 0, 0 };
     const int dx[4] = { 0, 0, -2, 2 };
@@ -334,7 +361,9 @@ void MazeGenerator::GenerateWithPrim()
                 visited[wy][wx] = true;
                 
                 addWalls(wy, wx);
-                
+
+                PrintMaze();
+
                 break;
             }
         }
