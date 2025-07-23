@@ -222,7 +222,7 @@ void MazeGenerator::GenerateWithSidewinder()
      *  4. 현재 셀에서 동쪽으로 길을 뚫을지, 아니면 run을 종료하고 남쪽으로 길을 뚫을지 무작위로 결정
      *  5. 4단계에서 결정한 방향에 따라 통로를 만들고 run 집합에 셀을 추가
      *  6. run에 포함된 셀 중 하나를 무작위로 선택해 그 셀과 아래쪽 셀을 연결해 통로 생성
-     *  7. 아래쪽 길을 만든 후 run을 초기화 하고 다음 셀로 이동해 4단계로 회귀
+     *  7. 아래쪽 길을 만든 후 run을 초기화 하고 다음 셀로 이동해 4~6단계를 반복
      *  8. 한 행이 끝났으면 다음 홀수 행으로 이동해 3단계로 회귀
      */
     
@@ -264,5 +264,81 @@ void MazeGenerator::GenerateWithSidewinder()
 
 void MazeGenerator::GenerateWithPrim()
 {
+    /*
+     * Prim
+     *  1. 모든 셀을 벽으로 초기화
+     *  2. 시작 셀을 통로로 만들고 방문 목록에 추가
+     *  3. 현재 통로에 인접한 벽들을 목록에 추가
+     *  4. 벽 목록에서 무작위로 하나의 벽을 선택
+     *  5. 선택한 벽의 반대쪽 셀이 방문하지 않은 곳인지 확인
+     *  6. 반대쪽 셀이 미로 영역 내에 있고 방문하지 않은 곳이라면 벽과 반대쪽 셀을 통로로 만듬
+     *  7. 새로 열린 셀을 방문 목록에 추가하고, 그 셀과 인접한 벽들을 벽 목록에 추가
+     *  8. 벽 목록이 빌 때까지 4~6단계를 반복
+     */
+    
     InitializeMaze();
+
+    bool visited[HEIGHT][WIDTH] = { false };
+    std::vector<std::pair<int, int>> wallList;
+
+    m_maze[1][1] = 1;
+    visited[1][1] = true;
+
+    const int dy[4] = { -2, 2, 0, 0 };
+    const int dx[4] = { 0, 0, -2, 2 };
+    
+    auto addWalls = [&](int y, int x)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            int ny = y + dy[i];
+            int nx = x + dx[i];
+
+            if (ny <= 0 || nx <= 0)
+                continue;
+
+            if (ny >= HEIGHT || nx >= WIDTH)
+                continue;
+
+            if (visited[ny][nx])
+                continue;
+
+            wallList.emplace_back(ny, nx);
+        }
+    };
+
+    addWalls(1, 1);
+
+    while (!wallList.empty())
+    {
+        int index = rand() % wallList.size();
+        int wy = wallList[index].first;
+        int wx = wallList[index].second;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int ny = wy + dy[i];
+            int nx = wx + dx[i];
+
+            if (ny <= 0 || nx <= 0)
+                continue;
+
+            if (ny >= HEIGHT || nx >= WIDTH)
+                continue;
+
+            if (visited[ny][nx] && !visited[wy][wx])
+            {
+                m_maze[wy][wx] = 1;
+                m_maze[wy + dy[i] / 2][wx + dx[i] / 2] = 1;
+                
+                visited[wy][wx] = true;
+                
+                addWalls(wy, wx);
+                
+                break;
+            }
+        }
+
+        wallList.erase(wallList.begin() + index);
+    }
 }
