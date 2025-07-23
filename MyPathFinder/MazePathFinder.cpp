@@ -45,7 +45,7 @@ void MazePathFinder::FindPathWithDFS()
      *  2. 스택이 비거나 도착지에 도달할 때까지 다음 단계를 반복
      *  3-1. 스택에서 값을 꺼내 현재 위치로 설정
      *  3-2. 현재 위치를 기준으로 인접 셀을 확인
-     *  3-2. 인접 셀이 방문하지 않았고 벽이 아니라면 스택에 넣고 방문 처리
+     *  3-2. 인접 셀이 방문되지 않았고 벽이 아니라면 스택에 넣고 방문 처리
      */
 
     std::stack<std::pair<int, int>> stack;
@@ -112,7 +112,7 @@ void MazePathFinder::FindPathWithBFS()
      *  2. 큐가 비거나 도착지에 도달할 때까지 다음 단계를 반복
      *  3-1. 큐에서 값을 꺼내 현재 위치로 설정
      *  3-2. 현재 위치를 기준으로 인접 셀을 확인
-     *  3-2. 인접 셀이 방문하지 않은 곳이며 벽이 아니라면 큐에 넣고 방문 처리
+     *  3-2. 인접 셀이 방문되지 않았고 벽이 아니라면 큐에 넣고 방문 처리
      */
 
     std::queue<std::pair<int, int>> queue;
@@ -171,8 +171,9 @@ void MazePathFinder::FindPathWithDijkstar()
      *  1. 시작 지점의 거리를 0으로 설정, 나머지는 무한대로 초기화
      *  2. 시작 지점을 거리가 짧은 순서로 처리하는 우선순위 큐에 넣음
      *  3. 큐가 비거나 도착지에 도달할 때까지 다음 단계를 반복
-     *  4-1. 큐에서 가장 거리가 짧은 셀을 꺼내고, 해당 셀에 인접한 셀을 검사
-     *  4-2. 인접 셀이 방문하지 않았고 벽이 아니며, 현재 경로보다 더 짧은 거리가 발견되면 거리를 갱신한다.
+     *  4-1. 큐에서 가장 거리가 짧은 셀을 꺼내고 방문 처리
+     *  4-2. 해당 셀에 인접한 셀을 검사
+     *  4-3. 인접 셀이 방문되지 않았고 벽이 아니며, 현재 경로보다 더 짧은 경우 거리를 갱신 후 큐에 넣음
      */
     
     int distance[MazeConfig::HEIGHT][MazeConfig::WIDTH];
@@ -241,5 +242,87 @@ void MazePathFinder::FindPathWithDijkstar()
 
 void MazePathFinder::FindPathWithAStar()
 {
-    
+    /*
+     * AStar
+     *  1. 시작 지점의 f, g, h를 구함
+     *  2. 시작 지점을 f가 가장 작은 순서로 처리하는 우선순위 큐에 넣음
+     *  3. 큐가 비거나 도착지에 도달할 때까지 다음 단계를 반복
+     *  4-1. 큐에서 가장 f가 작은 셀을 꺼내고 방문 처리
+     *  4-2. 해당 셀의 인접 셀을 검사
+     *  4-3. 인접 셀이 방문되지 않았고 벽이 아니며, g가 더 작다면 g와 h를 갱신 후 큐에 넣음
+     */
+
+    struct Node
+    {
+        int x, y;
+        int g;  // 시작점으로부터의 거리
+        int h;  // 도착지까지 추정 거리
+        
+        int f() const { return g + h; }
+        bool operator>(const Node& other) const
+        {
+            return f() > other.f();
+        }
+    };
+
+    const int dx[4] = { 0, 0, -1, 1 };
+    const int dy[4] = { -1, 1, 0, 0 };
+
+    std::priority_queue<Node, std::vector<Node>, std::greater<Node>> open;
+    bool visited[MazeConfig::HEIGHT][MazeConfig::WIDTH] = { false };
+    int gScore[MazeConfig::HEIGHT][MazeConfig::WIDTH];
+    std::fill(&gScore[0][0], &gScore[0][0] + MazeConfig::HEIGHT * MazeConfig::WIDTH, INT_MAX);
+
+    auto Heuristic = [](std::pair<int, int> start, std::pair<int, int> end)
+    {
+        return std::abs(start.first - end.first) + std::abs(start.second - end.second);
+    };
+
+    const std::pair<int, int> start = { 1, 1 };
+    const std::pair<int, int> end = { MazeConfig::WIDTH - 2, MazeConfig::HEIGHT - 2 };
+
+    gScore[start.second][start.first] = 0;
+    open.push({ start.first, start.second, 0, Heuristic(start, end)});
+
+    while (!open.empty())
+    {
+        Node current = open.top();
+        open.pop();
+
+        if (visited[current.y][current.x])
+            continue;
+
+        visited[current.y][current.x] = true;
+        m_maze[current.y][current.x] = 2;
+        m_mazeDrawer.Draw(m_maze);
+        
+        if (current.x == end.first && current.y == end.second)
+            break;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = current.x + dx[i];
+            int ny = current.y + dy[i];
+
+            if (nx <= 0 || ny <= 0)
+                continue;
+
+            if (nx >= MazeConfig::HEIGHT || ny >= MazeConfig::WIDTH)
+                continue;;
+
+            if (m_maze[ny][nx] == 0)
+                continue;
+            
+            if (visited[ny][nx])
+                continue;
+
+            int tentativeG = gScore[current.y][current.x] + 1;
+            if (tentativeG < gScore[ny][nx])
+            {
+                gScore[ny][nx] = tentativeG;
+                int h = Heuristic({nx, ny}, end);
+                open.push({nx, ny, tentativeG, h});
+            }
+        }
+    }
 }
