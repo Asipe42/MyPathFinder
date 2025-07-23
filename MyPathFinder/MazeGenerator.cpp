@@ -19,10 +19,10 @@ void MazeGenerator::Generate(EMazeGeneratorType type)
             GenerateWithBinaryTree();
             break;
         case EMazeGeneratorType::Sidewinder:
-            GenerateWithPrim();
+            GenerateWithSidewinder();
             break;
         case EMazeGeneratorType::Prim:
-            GenerateWithSidewinder();
+            GenerateWithPrim();
             break;
     }
     
@@ -196,10 +196,10 @@ void MazeGenerator::GenerateWithBinaryTree()
             m_maze[y][x] = 1;
             std::vector<std::pair<int, int>> dir;
 
-            if (y > 1)
-                dir.emplace_back(0, -1); // north
+            if (y < HEIGHT -2)
+                dir.emplace_back(0, 1); // South
             if (x < WIDTH -2)
-                dir.emplace_back(1, 0);  // east
+                dir.emplace_back(1, 0); // East
 
             if (!dir.empty())
             {
@@ -214,7 +214,52 @@ void MazeGenerator::GenerateWithBinaryTree()
 
 void MazeGenerator::GenerateWithSidewinder()
 {
+    /*
+     * Sidewinder
+     *  1. 모든 셀을 벽으로 초기화
+     *  2. 홀수 행을 왼쪽에서 오른쪽으로 순회
+     *  3. 현재 행에서 연속된 통로를 만들기 위한 run 집합을 초기화
+     *  4. 현재 셀에서 동쪽으로 길을 뚫을지, 아니면 run을 종료하고 남쪽으로 길을 뚫을지 무작위로 결정
+     *  5. 4단계에서 결정한 방향에 따라 통로를 만들고 run 집합에 셀을 추가
+     *  6. run에 포함된 셀 중 하나를 무작위로 선택해 그 셀과 아래쪽 셀을 연결해 통로 생성
+     *  7. 아래쪽 길을 만든 후 run을 초기화 하고 다음 셀로 이동해 4단계로 회귀
+     *  8. 한 행이 끝났으면 다음 홀수 행으로 이동해 3단계로 회귀
+     */
+    
     InitializeMaze();
+
+    for (int y = 1; y < HEIGHT - 1; y+= 2)
+    {
+        std::vector<int> run;
+
+        for (int x = 1; x < WIDTH - 1; x +=2)
+        {
+            m_maze[y][x] = 1;
+            run.push_back(x);
+
+            bool atEasternBoundary = (x + 2 >= WIDTH - 1);
+            bool atSoutherBoundary = (y + 2 >= HEIGHT - 1);
+            bool carveEast = !atEasternBoundary && (atSoutherBoundary || (rand() % 2 == 0));
+
+            if (carveEast)
+            {
+                m_maze[y][x + 1] = 1;
+            }
+            else
+            {
+                int randomIndex = rand() % run.size();
+                int carveX = run[randomIndex];
+
+                if (!atSoutherBoundary)
+                {
+                    m_maze[y + 1][carveX] = 1;
+                    m_maze[y + 2][carveX] = 1;
+                }
+
+                run.clear();
+            }
+        }
+    }
 }
 
 void MazeGenerator::GenerateWithPrim()

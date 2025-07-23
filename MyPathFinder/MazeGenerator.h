@@ -9,8 +9,8 @@ public:
     void Generate(EMazeGeneratorType type);
 
 private:
-    static constexpr int WIDTH = 15;
-    static constexpr int HEIGHT = 15;
+    static constexpr int WIDTH = 25;
+    static constexpr int HEIGHT = 25;
     std::vector<std::vector<int>> m_maze;
 
     void InitializeMaze();
