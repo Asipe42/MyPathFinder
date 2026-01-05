@@ -1,9 +1,7 @@
 ﻿#include "MazePathFinder.h"
 
-#include <immintrin.h>
 #include <iostream>
 #include <queue>
-#include <smmintrin.h>
 #include <stack>
 
 #include "MazeConfig.h"
